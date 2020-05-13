@@ -1,3 +1,9 @@
 h1 {
     color: blue;
 }
+
+.img_fluid {
+ 
+  width: 50%;
+  margin:0px;
+}
