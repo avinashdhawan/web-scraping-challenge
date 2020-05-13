@@ -12,141 +12,88 @@ def init_browser():
 def scrape_info():
     # all the scraping code here
     browser = init_browser()
-# URL of page to be scraped
+    # **Get First Headline and Teaser**
+
+    # URL of page to be scraped
     url = 'https://mars.nasa.gov/news/?page=0&per_page=40&order=publish_date+desc%2Ccreated_at+desc&search=&category=19%2C165%2C184%2C204&blank_scope=Latest'
     browser.visit(url)
-
-    time.sleep(10)
+    import time
+    time.sleep(2)
     html = browser.html
-# Parse HTML with Beautiful Soup
+    # Parse HTML with Beautiful Soup
     soup = BeautifulSoup(html, 'html.parser')
 
-
-
-
-# Retrieve all elements that contain book information
-    articles = soup.find_all("div", class_="list_text")
-
-
+    # Retrieve all headlines
+    headlines = soup.find_all("div", class_="list_text")
 
     titles =[]
 
-    for article in articles:
+    for headline in headlines:
         # Use Beautiful Soup's find() method to navigate and retrieve attributes
-        a = article.find('a').text
+        a = headline.find('a').text
         titles.append(a)
-        print('-----------')
-        print(a)
+    #         print('-----------')
+    #         print(a)
 
-
-    #     # Click the 'Next' button on each page
-    #     try:
-    #         browser.click_link_by_partial_text('next')
-        
-    #     except:
-    #         print("Scraping Complete")
-
-
-
-    titles[0]
-
-
-
+    news_title = titles[0]
+    news_title
 
     blurb =[]
 
-    for article in articles:
+    for headline in headlines:
         # Use Beautiful Soup's find() method to navigate and retrieve attributes
-        b = article.find('div', class_ = "article_teaser_body").text
+        b = headline.find('div', class_ = "article_teaser_body").text
         blurb.append(b)
-        print('-----------')
-        print(blurb)
+    #         print('-----------')
+    #         print(blurb)
 
-
-    #     # Click the 'Next' button on each page
-    #     try:
-    #         browser.click_link_by_partial_text('next')
-        
-    #     except:
-    #         print("Scraping Complete")
-
-
-
-    blurb[0]
-
-
-
-    news_title = titles[0]
-
-    news_title
-
-
-
-
-    news_p = blurb[0]
+    news_p =blurb[0]
     news_p
 
 
+    # **Get Featured Image**
 
-
-    # URL of page to be scraped
+    # URL of starting page
     url = 'https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars'
     browser.visit(url)
 
-    time.sleep(2)
-    html2 = browser.html
-    # Parse HTML with Beautiful Soup
-    soup2 = BeautifulSoup(html2, 'html.parser')
-
-
-
-
-    # Retrieve image file
-    image_file = soup2.find_all("div", class_="carousel_items")
-    image_file
-
-
-
+    #Click through pages to get to page to be scraped
     browser.click_link_by_partial_text('FULL IMAGE')
-
-
-
     browser.click_link_by_partial_text('more info')
-
-
-
     browser.click_link_by_partial_text('jpg')
 
-
-
+    #Extract link from page
     full_res_html = browser.html
     soup_full_res = BeautifulSoup(full_res_html, 'html.parser')
-
-
-
     featured_image_url =soup_full_res.find('img')['src']
     featured_image_url
 
-
+    # **Extract Weather Data**
 
     # URL of page to be scraped
     url_weather = 'https://twitter.com/marswxreport?lang=en'
     browser.visit(url_weather)
 
-    time.sleep(10)
+    time.sleep(2)
     html_weather = browser.html
     # Parse HTML with Beautiful Soup
     soup_weather = BeautifulSoup(html_weather, 'html.parser')
 
 
-
-
+    # #Data to be extracted
     mars_weather=soup_weather.find('div', class_ ='css-901oao r-hkyrab r-1qd0xha r-a023e6 r-16dba41 r-ad9z0x r-bcqeeo r-bnwqim r-qvutc0').text
     mars_weather
 
+   # **Space Facts Table**
 
 
-    # URL of page to be scraped
+    mars_df = pd.read_html('https://space-facts.com/mars/')[0]
+    mars_df.columns=["Description", "Value"]
+    mars_df.set_index("Description", inplace = True)
+    mars_facts =mars_df.to_html(classes="table")
+    mars_facts = mars_facts.replace("'","")
+
+    # # URL of page to be scraped
     # url_mars_facts = 'https://space-facts.com/mars/'
     # browser.visit(url_mars_facts)
 
@@ -155,14 +102,8 @@ def scrape_info():
     # # Parse HTML with Beautiful Soup
     # soup_mars_facts = BeautifulSoup(html_mars_facts, 'html.parser')
 
-
-
     # mars_facts=soup_mars_facts.find('table', class_ ='tablepress tablepress-id-p-mars')
     # mars_facts
-    mars_df = pd.read_html('https://space-facts.com/mars/')[0]
-    mars_df.columns=["Description", "Value"]
-    mars_df.set_index("Description", inplace = True)
-    mars_facts =mars_df.to_html(classes="table")
 
 
     # **Mars Hemispheres**
@@ -170,149 +111,90 @@ def scrape_info():
 
     # Cerberus Hemisphere Enhanced
 
-
-    # URL of page to be scraped
+    # Starting URL
     url_mars_hemi = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
     browser.visit(url_mars_hemi)
 
-    time.sleep(2)
-    html_mars_hemi = browser.html
-    # Parse HTML with Beautiful Soup
-    soup_mars_hemi = BeautifulSoup(html_mars_hemi, 'html.parser')
-
-
-
-    mars_hemi=soup_mars_hemi.find('div', class_ ='collapsible results')
-    mars_hemi
-
-
-
-
+    # Click to URL of page to be scraped and extract data
     browser.click_link_by_partial_text('Cerberus Hemisphere Enhanced')
     first_hemi_html = browser.html
     soup_first_hemi = BeautifulSoup(first_hemi_html, 'html.parser')
-    featured_img1_url =soup_first_hemi.find('a', text ='Sample').get("href")
 
-    # featured_img1_url
+    #Pull specific data from webpage
+    hemi_title1_url = soup_first_hemi.find('h2', class_ ='title').text
+    hemi_img1_url =soup_first_hemi.find('a', text ='Sample').get("href")
 
-
-
-    summary_featured_title1 =soup_first_hemi.find('h2', class_ = 'title').text
-    # summary_featured_img1 =featured_img1_url.find('a')['href']
-    first ={'title':summary_featured_title1, "img_url":featured_img1_url}
+    #Put data into a dictionary
+    first ={'title':hemi_title1_url, "img_url":hemi_img1_url}
     first
 
 
     # Schiaparelli Hemisphere Enhanced
 
 
-
-    # URL of page to be scraped
+    # Starting URL
     url_mars_hemi = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
     browser.visit(url_mars_hemi)
 
-    time.sleep(2)
-    html_mars_hemi = browser.html
-    # Parse HTML with Beautiful Soup
-    soup_mars_hemi = BeautifulSoup(html_mars_hemi, 'html.parser')
-
-
-
-
-
-
-
-    # # soup_mars_hemi = BeautifulSoup(html_mars_hemi, 'html.parser')
-    # mars_hemi=soup_mars_hemi.find('div', class_ ='collapsible results')
-
-
-
-
-
+    # Click to URL of page to be scraped and extract data
     browser.click_link_by_partial_text('Schiaparelli Hemisphere Enhanced')
     second_hemi_html = browser.html
     soup_second_hemi = BeautifulSoup(second_hemi_html, 'html.parser')
-    featured_img2_url =soup_second_hemi.find('div', class_ ='content')
 
-    featured_img2_url
+    #Pull specific data from webpage
+    hemi_title2_url = soup_second_hemi.find('h2', class_ ='title').text
+    hemi_img2_url =soup_second_hemi.find('a', text ='Sample').get("href")
 
-
-
-    summary_featured_title2 =featured_img2_url.find('h2', class_ = 'title').text
-    summary_featured_img2 =featured_img2_url.find('a')['href']
-    second ={'title':summary_featured_title2, "img_url":summary_featured_img2}
+    #Put data into a dictionary
+    second ={'title':hemi_title2_url, "img_url":hemi_img2_url}
     second
 
 
     # Syrtis Major Hemisphere Enhanced
 
-
-    # URL of page to be scraped
+    # Starting URL
     url_mars_hemi = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
     browser.visit(url_mars_hemi)
 
-    time.sleep(2)
-    html_mars_hemi = browser.html
-    # Parse HTML with Beautiful Soup
-    soup_mars_hemi = BeautifulSoup(html_mars_hemi, 'html.parser')
-
-
-
+    # Click to URL of page to be scraped and extract data
     browser.click_link_by_partial_text('Syrtis Major Hemisphere Enhanced')
     third_hemi_html = browser.html
     soup_third_hemi = BeautifulSoup(third_hemi_html, 'html.parser')
-    featured_img3_url =soup_third_hemi.find('div', class_ ='content')
 
-    featured_img3_url
+    #Pull specific data from webpage
+    hemi_title3_url = soup_third_hemi.find('h2', class_ ='title').text
+    hemi_img3_url =soup_third_hemi.find('a', text ='Sample').get("href")
 
-
-
-    summary_featured_title3 =featured_img3_url.find('h2', class_ = 'title').text
-    summary_featured_img3 =featured_img3_url.find('a')['href']
-    third ={'title':summary_featured_title3, "img_url":summary_featured_img3}
+    #Put data into a dictionary
+    third ={'title':hemi_title3_url, "img_url":hemi_img3_url}
     third
-
-
-
-
 
 
     # Valles Marineris Hemisphere Enhanced
 
-
-    # URL of page to be scraped
+    # Starting URL
     url_mars_hemi = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
     browser.visit(url_mars_hemi)
 
-    time.sleep(2)
-    html_mars_hemi = browser.html
-    # Parse HTML with Beautiful Soup
-    soup_mars_hemi = BeautifulSoup(html_mars_hemi, 'html.parser')
-
-
-
+    # Click to URL of page to be scraped and extract data
     browser.click_link_by_partial_text('Valles Marineris Hemisphere Enhanced')
-    fourth_hemi_html = browser.html
-    soup_fourth_hemi = BeautifulSoup(fourth_hemi_html, 'html.parser')
-    featured_img4_url =soup_fourth_hemi.find('div', class_ ='content')
+    forth_hemi_html = browser.html
+    soup_forth_hemi = BeautifulSoup(forth_hemi_html, 'html.parser')
 
-    featured_img4_url
+    #Pull specific data from webpage
+    hemi_title4_url = soup_forth_hemi.find('h2', class_ ='title').text
+    hemi_img4_url =soup_forth_hemi.find('a', text ='Sample').get("href")
 
-
-
-
-    summary_featured_title4 =featured_img4_url.find('h2', class_ = 'title').text
-    summary_featured_img4 =featured_img4_url.find('a')['href']
-    fourth ={'title':summary_featured_title4, "img_url":summary_featured_img4}
-    fourth
+    #Put data into a dictionary
+    forth ={'title':hemi_title4_url, "img_url":hemi_img4_url}
+    forth
 
 
     # Dictionary - Titles and Image Files
 
-
-
-    hemisphere_images_urls = [first, second, third, fourth]
+    hemisphere_images_urls = [first, second, third, forth]
     hemisphere_images_urls
+
 
     # Store data in a dictionary
     mars_data = {
